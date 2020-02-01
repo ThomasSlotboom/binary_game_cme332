@@ -176,23 +176,6 @@ int read_switches(void){
   return 0;
 }
 
-int display_answers(void){
-  int i;
-  for (i=0; i<8; i++){
-    // if the LED at point 1<<i is on and the answer has a 0 at that spot:
-    if (((*ledr_ptr & 1<<i) == 1) && ((number & 1<<i) == 0))
-      *ledr_ptr &= ~1<<i; //clear that bit
-    *ledr_ptr |= number;
-  }
-  return 0;
-}
-
-int clear_LED(void){
-  *ledr_ptr &= ~0xFF;
-  return 0;
-}
-
-
 int read_keys(void){
   if (key0){
     if (state == PAUSE){
@@ -205,6 +188,7 @@ int read_keys(void){
     {
       case IDLE:
         state = PLAY;
+        time = 30;
         break;
       case PLAY:
         state = PAUSE;
@@ -225,8 +209,31 @@ int read_keys(void){
 }
 
 
+int display_answers(void){
+  int i;
+  for (i=0; i<8; i++){
+    // if the LED at point 1<<i is on and the answer has a 0 at that spot:
+    if (((*ledr_ptr & 1<<i) == 1) && ((number & 1<<i) == 0))
+      *ledr_ptr &= ~1<<i; //clear that bit
+    *ledr_ptr |= number;
+  }
+  return 0;
+}
+
+int clear_LED(void){
+  *ledr_ptr &= ~0xFF;
+  *ledg_ptr &= ~0x1FF;
+  return 0;
+}
+
+
+
+
+
 int task1(){
   task1flag = 1;
+  *ledg_ptr |= 0x2; // ledg1 on
+
   if (power == ON){
     if (state != IDLE){
       display_question_time();
@@ -239,33 +246,40 @@ int task1(){
     clear_all_hex();
     clear_LED();
   }
+
   task1flag = 0;
+  *ledg_ptr &= ~0x2; // ledg1 off
   return 0;
 }
 
-int task2(){
+int task2(void){
   task2flag = 1;
+  *ledg_ptr |= 0x4; // ledg2 on
+
   read_switches();
   read_keys();
+
   task2flag = 0;
+  *ledg_ptr &= ~0x4; // ledg2 off
   return 0;
 }
 
-int task3(){
-  task2flag = 1;
+int task3(void){
+  task3flag = 1;
+  *ledg_ptr |= 0x8; // ledg3 on
+
   if (power == ON){
 
   }
   else{
     state = IDLE;
   }
+
   task3flag = 0;
+  *ledg_ptr &= ~0x8; // ledg3 off
   return 0;
 }
 
-void frame_overrun_display(void){
-  *ledg_ptr |= 0x
-}
 
 int main(void) {
   startup();
@@ -278,11 +292,13 @@ int main(void) {
       task3(); // update game states
       frame = 0;
     }
-    if (!frame){
-      *ledg_ptr |= 0x80; // turn on ledg7 when no task is running
-    }
-    if (frame_overrun){
-      *ledg_ptr |= 0x100; // turn on ledg8 if a frame overrun occurs
+    if (power == ON){}
+      if (!frame){
+        *ledg_ptr |= 0x80; // turn on ledg7 when no task is running
+      }
+      if (frame_overrun){
+        *ledg_ptr |= 0x100; // turn on ledg8 if a frame overrun occurs
+      }
     }
 
   }

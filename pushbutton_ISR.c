@@ -4,8 +4,7 @@
 extern volatile int * KEY_ptr;
 extern volatile int state;
 extern volatile int key0, key1, key2;
-extern volatile int task1flag, task2flag, task3flag;
-extern volatile int frame_overrun;
+
 
 /*******************************************************************************
  * Pushbutton - Interrupt Service Routine
@@ -25,8 +24,6 @@ void pushbutton_ISR(void) {
     if (press & 0x2){ key1 = 1;}
     if (press & 0x2){ key2 = 1;}
 
-    if (task1flag || task2flag || task3flag){
-      frame_overrun = 1;
-    }
+
     return;
 }
