@@ -145,7 +145,6 @@ void display_question(void){
   load_register(hex_3_0_ptr, lut_num[dig_1], 0);
   load_register(hex_3_0_ptr, lut_num[dig_10], 1);
   load_register(hex_3_0_ptr, lut_num[dig_100], 2);
-  }
 }
 
 void display_timer(void){
