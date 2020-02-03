@@ -43,31 +43,29 @@ struct {
 int volatile state = IDLE;
 // power - on or off
 int volatile power = OFF;
-
-// binary number that player must match
-int number;
-// inputted number from player
-int playerNum;
-// show answer to binary number
-int answers = OFF;
-// flags to check if a key has been pressed
-volatile int key0, key1, key2 = 0;
-// answer to be submitted
-int submit_answer = 0;
-
 // flags to check for frame overrun
 int task1flag, task2flag, task3flag = 0;
 // flag to confirm a frame overrun occurred
 int frame_overrun = 0;
 // flag to indicate a new frame has been reached
 int volatile frameFlag = 0;
-
+// flags to check if a key has been pressed
+volatile int key0, key1, key2 = 0;
+// show answer to binary number
+int answers = OFF;
+// answer to be submitted
+int submit_answer = OFF;
+// binary number that player must match
+int number;
+// inputted number from player
+int playerNum;
 // The question number the palyer is on;
 int question_number = 1;
 // level of the game;
 int level = 1;
 // The score of the player
 int score = 0;
+// point awarded when a question is answered correctly
 int points_awarded = 1;
 
 
@@ -102,7 +100,7 @@ void startup(void){
 }
 
 /*******************************************************************************
-                            Task1
+                            Task1(View)
                     Display hex and LEDs
 *******************************************************************************/
 
@@ -132,20 +130,9 @@ void load_register(volatile int* ptr, int num, int offset){
   *ptr |= (num<<(offset*BYTE_SIZE));
 }
 
-// int* get_digits(int num, int size){
-//   static int array[size];
-//   for (int i=0; i<size; i++){
-//     array[i] = num % 10;
-//     num = num / 10;
-//   }
-//
-//   return array;
-// }
-
 // display answers on ledr7-0
 void display_answers(void){
   load_register(ledr_ptr, number, 0);
-  return 0;
 }
 
 // display decimal number on hex2-0
@@ -158,15 +145,11 @@ void display_question(void){
   load_register(hex_3_0_ptr, lut_num[dig_1], 0);
   load_register(hex_3_0_ptr, lut_num[dig_10], 1);
   load_register(hex_3_0_ptr, lut_num[dig_100], 2);
-
-  // int *dig = get_digits(number, 3);
-  // for (int i=0; i<3; i++){
-  //   load_register(hex_3_0_ptr, lut_num[dig[i]], i);
-  // }
+  }
 }
 
 void display_timer(void){
-  int dig_1, dig_10, dig_100;
+  int dig_1, dig_10;
   dig_1 = t.time % 10;
   dig_10 = ((t.time - dig_1) / 10) % 10;
 
@@ -235,8 +218,8 @@ void clear_all_red_LED(){
 Clear all the red and green LEDs
 */
 void clear_all_LED(void){
-  *ledr_ptr &= ~0xFF;
-  *ledg_ptr &= ~0x1FF;
+  *ledr_ptr &= ~0xFFFF;
+  *ledg_ptr &= ~0xFFFF;
 }
 
 void task1(){
@@ -278,17 +261,19 @@ void task1(){
     clear_all_hex();
     clear_all_LED();
   }
+  // for (int i=0;i<30000000;i++){} // check for frame overrun
 
   task1flag = 0;
   *ledg_ptr &= ~0x2; // ledg1 off
 }
 
 /*******************************************************************************
-                            Task2
+                            Task2 (Controller)
+                    Read switches and buttons
 *******************************************************************************/
 
 
-int read_keys(void){
+void read_keys(void){
   if (key0){
     if (state == PAUSE){
       state = IDLE;
@@ -316,13 +301,12 @@ int read_keys(void){
   }
   if (key2){
     if (state == PLAY)
-      submit_answer = 1;
+      submit_answer = ON;
     key2 = 0;
   }
-  return 0;
 }
 
-int read_switches(void){
+void read_switches(void){
   if ((*(slider_switch_ptr) & 0x20000) == 0x20000){ // poll SW17
     power = ON;
   }
@@ -335,10 +319,9 @@ int read_switches(void){
     answers = OFF;
 
   playerNum = *(slider_switch_ptr) & 0xFF;
-  return 0;
 }
 
-int task2(void){
+void task2(void){
   task2flag = 1;
   *ledg_ptr |= 0x4; // ledg2 on
 
@@ -347,18 +330,12 @@ int task2(void){
 
   task2flag = 0;
   *ledg_ptr &= ~0x4; // ledg2 off
-  return 0;
 }
 
 /*******************************************************************************
-                            Task3
+                            Task3 (Model)
+                    Update values within game, and states
 *******************************************************************************/
-
-
-
-// void reset_game(void){
-//
-// }
 
 // get a random number from the modulus of the lower snapshot of the timer
 void rand_num(void){
@@ -388,9 +365,9 @@ void timer_handler(void){
 void reset_game(void){
   t.time = t.start_time;
   t.tenCounter = 0;
-  t.total_game_time = 280;
+  t.total_game_time = 0;
   t.start_time = 30;
-  question_number = 9;
+  question_number = 0;
   score = 0;
   rand_num();
 }
@@ -401,7 +378,7 @@ void level_handler(void){
   points_awarded = 1 + level;
 }
 
-int task3(void){
+void task3(void){
   task3flag = 1;
   *ledg_ptr |= 0x8; // ledg3 on
 
@@ -425,7 +402,7 @@ int task3(void){
         }
         else
           *ledg_ptr &= ~0x10; //TODO get rid of this line
-        submit_answer = 0;
+        submit_answer = OFF;
       }
     }
   }
@@ -436,10 +413,9 @@ int task3(void){
 
   task3flag = 0;
   *ledg_ptr &= ~0x8; // ledg3 off
-  return 0;
 }
 
-int main(void) {
+void main(void) {
   startup();
 
   while (1){
@@ -461,9 +437,5 @@ int main(void) {
     else{
       clear_all_LED();
     }
-
-
-
-
   }
 }
