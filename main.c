@@ -396,11 +396,9 @@ void task3(void){
           rand_num();
           t.time = t.start_time;
           t.tenCounter = 0;
-          *ledg_ptr |= 0x10; //TODO get rid of this line
           score += points_awarded;
         }
         else
-          *ledg_ptr &= ~0x10; //TODO get rid of this line
         submit_answer = OFF;
       }
     }
@@ -413,6 +411,11 @@ void task3(void){
   task3flag = 0;
   *ledg_ptr &= ~0x8; // ledg3 off
 }
+
+/*******************************************************************************
+                            Main
+*******************************************************************************/
+
 
 void main(void) {
   startup();
