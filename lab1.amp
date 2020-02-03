@@ -3,7 +3,7 @@
     <system>
         <sample_system_title>DE2-115 Computer for Nios II</sample_system_title>
         <board>Not Required</board>
-        <cable>USB-Blaster [3-3.4.2]</cable>
+        <cable>USB-Blaster [3-2]</cable>
         <processor>Nios2</processor>
         <reset_processor_during_load>true</reset_processor_during_load>
         <terminal>JTAG_UART</terminal>
@@ -15,10 +15,10 @@
             <source_file filepath="true">exception_handler.c</source_file>
             <source_file filepath="true">interval_timer_ISR.c</source_file>
             <source_file filepath="true">pushbutton_ISR.c</source_file>
+            <source_file filepath="true">amp/lib/src/niosII_jtag_uart.c</source_file>
             <header_file filepath="true">nios2_ctrl_reg_macros.h</header_file>
             <header_file filepath="true">globals.h</header_file>
             <header_file filepath="true">address_map_nios2.h</header_file>
-            <source_file filepath="true">amp/lib/src/niosII_jtag_uart.c</source_file>
         </source_files>
         <options>
             <compiler_flags>-g -O1 -ffunction-sections -fverbose-asm -fno-inline -mno-cache-volatile</compiler_flags>

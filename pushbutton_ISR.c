@@ -22,7 +22,7 @@ void pushbutton_ISR(void) {
 
     if (press & 0x1){ key0 = 1;}
     if (press & 0x2){ key1 = 1;}
-    if (press & 0x2){ key2 = 1;}
+    if (press & 0x4){ key2 = 1;}
 
 
     return;

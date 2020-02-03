@@ -32,13 +32,13 @@ SRCS		:= main.c exception_handler.c interval_timer_ISR.c pushbutton_ISR.c amp/li
 OBJS		:= $(patsubst %, %.o, $(SRCS))
 
 # Targets
-compile: interrupt_example.srec
+compile: main.srec
 
-interrupt_example.srec: interrupt_example.elf
+main.srec: main.elf
 	$(RM) $@
 	$(OC) $(OCFLAGS) $< $@
 
-interrupt_example.elf: $(OBJS)
+main.elf: $(OBJS)
 	$(RM) $@
 	$(CC) $(LDFLAGS) $(OBJS) -o $@
 
@@ -51,4 +51,5 @@ interrupt_example.elf: $(OBJS)
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	$(RM) interrupt_example.srec interrupt_example.elf $(OBJS)
+	$(RM) main.srec main.elf $(OBJS)
+
