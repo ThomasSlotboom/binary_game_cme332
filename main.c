@@ -79,12 +79,11 @@ void rand_num(void);
 Intiallizes clock and enables interrupts
 */
 void startup(void){
-  // time initially is 30 seconds
 
   reset_game();
 
   /* set the interval timer period for incrementing the timer */
-  int counter = 5000000; // 1/(50MHz) x (5,000,000) = 0.1 sec
+  int counter = 833333; // 1/(50MHz) x (833,333) = 0.017 sec (60 fps)
   *(interval_timer_ptr + 0x2) = (counter & 0xFFFF);
   *(interval_timer_ptr + 0x3) = (counter >> 16) & 0xFFFF;
 
@@ -100,8 +99,8 @@ void startup(void){
 }
 
 /*******************************************************************************
-                            Task1(View)
-                    Display hex and LEDs
+                            Task1 (View)
+                        Display hex and LEDs
 *******************************************************************************/
 
 /*
@@ -268,7 +267,7 @@ void task1(){
 
 /*******************************************************************************
                             Task2 (Controller)
-                    Read switches and buttons
+                        Read switches and buttons
 *******************************************************************************/
 
 
@@ -333,7 +332,7 @@ void task2(void){
 
 /*******************************************************************************
                             Task3 (Model)
-                    Update values within game, and states
+                    Update game's internal values
 *******************************************************************************/
 
 // get a random number from the modulus of the lower snapshot of the timer
@@ -348,9 +347,9 @@ void rand_num(void){
 
 void timer_handler(void){
   if (state == PLAY){
-    t.tenCounter++;
-    if (t.tenCounter == 10){
-      t.tenCounter = 0;
+    t.sixtyCounter++;
+    if (t.sixtyCounter == 60){
+      t.sixtyCounter = 0;
       t.total_game_time++;
       if (t.time > 0){
         t.time--;
@@ -363,7 +362,7 @@ void timer_handler(void){
 
 void reset_game(void){
   t.time = t.start_time;
-  t.tenCounter = 0;
+  t.sixtyCounter = 0;
   t.total_game_time = 0;
   t.start_time = 30;
   question_number = 0;
@@ -373,7 +372,7 @@ void reset_game(void){
 
 void level_handler(void){
   level = question_number / 10; // 1 level for every 10 questions
-  t.start_time = 30 - level;
+  t.start_time = 30 - 5*level;
   points_awarded = 1 + level;
 }
 
@@ -395,7 +394,7 @@ void task3(void){
           question_number++;
           rand_num();
           t.time = t.start_time;
-          t.tenCounter = 0;
+          t.sixtyCounter = 0;
           score += points_awarded;
         }
         else
@@ -423,9 +422,15 @@ void main(void) {
   while (1){
     if (frameFlag){
       *ledg_ptr &= ~0x80; // tasks are running, led7 off
-      task1(); // update hex/leds
-      task2(); // read switches and keys
-      task3(); // update game states
+      if (t.sixtyCounter % 3 == 0){
+        task1(); // update hex/leds
+      }
+      else if (t.sixtyCounter % 3 == 1){
+        task2(); // read switches and keys
+      }
+      else if (t.sixtyCounter % 3 == 2){
+        task3(); // update game states
+      }
       frameFlag = 0;
     }
     if (power == ON){

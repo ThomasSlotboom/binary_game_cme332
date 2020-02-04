@@ -13,12 +13,6 @@ extern volatile int frame_overrun;
  * Interval timer interrupt service routine
  ******************************************************************************/
 void interval_timer_ISR() {
-    // if (state == PLAY){
-    //   if (time > 0)
-    //     time = time - 0.1;
-    //   else
-    //     time = 30;
-    // }
     *(interval_timer_ptr) = 0; // clear the interrupt
     if (task1flag || task2flag || task3flag){
       frame_overrun = 1;
